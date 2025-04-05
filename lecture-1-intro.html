@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 1: Introduction</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--accent-green);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+        h2 {
+            color: var(--accent-yellow);
+        }
+        a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .code-editor {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--accent-green);
+            margin: 20px 0;
+            position: relative;
+        }
+        .code-editor::after {
+            content: ">";
+            position: absolute;
+            left: 10px;
+            top: 15px;
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+        textarea {
+            background: transparent;
+            color: white;
+            border: none;
+            width: 100%;
+            padding-left: 20px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 100px;
+        }
+        button {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(30, 144, 255, 0.3);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent-blue);
+        }
+        #output {
+            background: #000;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .warning {
+            color: var(--accent-yellow);
+            border-left: 3px solid var(--accent-yellow);
+            padding-left: 10px;
+            margin: 20px 0;
+        }
+        .tip {
+            color: var(--accent-green);
+            border-left: 3px solid var(--accent-green);
+            padding-left: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lecture 1: Introduction to PowerShell & Security</h1>
+    
+    <div class="tip">
+        <strong>Pro Tip:</strong> This course teaches PowerShell like a martial art—every command must be precise, controlled, and secure.
+    </div>
+
+    <h2>Why PowerShell?</h2>
+    <ul>
+        <li><strong>Automation:</strong> Eliminate repetitive tasks with scripts</li>
+        <li><strong>Power:</strong> Control Windows, Linux, and macOS systems</li>
+        <li><strong>Security:</strong> Built-in features like execution policies and logging</li>
+    </ul>
+
+    <div class="warning">
+        <strong>Warning:</strong> Great power comes with great responsibility. Misused PowerShell can be a hacker's weapon.
+    </div>
+
+    <h2>Your First Spell (Command)</h2>
+    <div class="code-editor">
+        <textarea id="user-code">Write-Host "I am a PowerShell ninja!" -ForegroundColor Green</textarea>
+        <button onclick="runCode()">Cast Spell (Run Code)</button>
+        <div id="output"></div>
+    </div>
+
+    <h2>Security Foundation: Execution Policies</h2>
+    <p>PowerShell restricts script execution by default to prevent attacks:</p>
+    <div class="code-editor">
+        <pre><code># Check current policy
+Get-ExecutionPolicy
+
+# Set a safer policy (recommended)
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+    </div>
+
+    <h2>Challenge: The Initiation Test</h2>
+    <ol>
+        <li>Write a script that displays your username and execution policy</li>
+        <li>Make your username appear in <span style="color: var(--accent-green);">green</span> and policy in <span style="color: var(--accent-yellow);">yellow</span></li>
+    </ol>
+    
+    <button onclick="showSolution()">Reveal Secret Technique</button>
+    <div id="solution" style="display: none;" class="code-editor">
+        <pre><code># Solution:
+$user = $env:USERNAME
+$policy = Get-ExecutionPolicy
+Write-Host "User:" -NoNewline
+Write-Host " $user" -ForegroundColor Green
+Write-Host "Policy:" -NoNewline
+Write-Host " $policy" -ForegroundColor Yellow</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="index.html">← Back to Dojo Entrance</a>
+        <a href="lecture-2-basics.html">Next: PowerShell Basics →</a>
+    </div>
+
+    <script>
+        // Simulated code execution
+        function runCode() {
+            const code = document.getElementById('user-code').value;
+            const output = document.getElementById('output');
+            
+            // Simulate different commands
+            if (code.includes('Get-ExecutionPolicy')) {
+                output.innerHTML = `<span style="color: var(--accent-green)">Restricted</span>`;
+            } 
+            else if (code.includes('$env:USERNAME')) {
+                output.innerHTML = `<span style="color: var(--accent-green)">User: </span>NinjaMaster\n<span style="color: var(--accent-yellow)">Policy: </span>RemoteSigned`;
+            }
+            else {
+                output.innerHTML = `<span style="color: var(--accent-green)">> ${code}</span>\nI am a PowerShell ninja!`;
+            }
+            
+            // Track progress
+            if (!localStorage.getItem('completedLectures')) {
+                localStorage.setItem('completedLectures', JSON.stringify([]));
+            }
+            let completed = JSON.parse(localStorage.getItem('completedLectures'));
+            if (!completed.includes(1)) {
+                completed.push(1);
+                localStorage.setItem('completedLectures', JSON.stringify(completed));
+            }
+        }
+
+        function showSolution() {
+            document.getElementById('solution').style.display = 'block';
+        }
+
+        // Easter egg
+        console.log('%c (•_•)\n<(╯°□°)╯︵ ┻━┻\n PowerShell Kung Fu!', 
+            'font-family: monospace; font-size: 14px; color: #64ffda;');
+    </script>
+</body>
+</html>
