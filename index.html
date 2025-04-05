@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu: Code + Security</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: var(--accent-green);
+            border-bottom: 2px solid var(--accent-blue);
+            display: inline-block;
+        }
+        .profile-img {
+            width: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-green);
+            box-shadow: 0 0 15px var(--accent-blue);
+        }
+        .btn {
+            background: var(--accent-blue);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            margin: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
+        }
+        .course-features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin: 40px 0;
+        }
+        .feature {
+            background: rgba(30, 144, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            width: 220px;
+            border-left: 4px solid var(--accent-green);
+            transition: all 0.3s;
+        }
+        .feature:hover {
+            transform: scale(1.05);
+            background: rgba(30, 144, 255, 0.2);
+        }
+        .logos {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .logo {
+            height: 60px;
+            filter: drop-shadow(0 0 5px var(--accent-green));
+        }
+        .bio {
+            max-width: 600px;
+            margin: 20px auto;
+            font-style: italic;
+            color: var(--accent-yellow);
+        }
+        .social-share {
+            margin: 30px 0;
+        }
+        .social-btn {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin: 0 10px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: white;
+            line-height: 40px;
+            transition: all 0.3s;
+        }
+        .social-btn:hover {
+            transform: scale(1.2);
+        }
+        .twitter { background: #1DA1F2; }
+        .linkedin { background: #0077B5; }
+        .facebook { background: #4267B2; }
+        .whatsapp { background: #25D366; }
+        .cta-text {
+            font-size: 1.2em;
+            margin: 20px 0;
+            color: var(--accent-yellow);
+        }
+    </style>
+</head>
+<body>
+    <!-- PowerShell Logo --> 
+    <div class="logos">
+        <img src="C:/Users/Newton/Desktop/POWERSHELL/powershell.png" alt="PowerShell Kung Fu" class="logo">
+        <img src="C:/Users/Newton/Desktop/POWERSHELL/labofedenlogo.jpg" alt="Lab of Eden" class="logo">
+    </div>
+    <h1>Free powershell Caurse.In Lab of Eden(LoE) we dont sell knoledge</h1>
+    <h2>PowerShell Kung Fu: Code + Security</h2>
+    <p class="bio">Master the art of PowerShell automation and protect Computers and systems from data breaches. Do it like a digital ninja.</p>
+
+    <!-- Developer Profile -->
+    <div>
+        <img src="C:/Users/Newton/Desktop/POWERSHELL/passport +.png" alt="developer" class="profile-img">
+        <h2>Newton</h2>
+        <p>🔥 <em>"Cybersecurity and Automation specialist, AI enthosist,HealthTech and database Atitech"</em></p>
+        <p>Powered by <strong>Lab of Eden</strong></p>
+        <a href="https://github.com/Lab-of-Eden" target="_blank" class="btn" style="background: var(--accent-green);">
+            <span style="color: var(--dark-bg);">⚡ GitHub</span>
+        </a>
+    </div>
+
+    <!-- Persuasive Call-to-Action -->
+    <div class="cta-text">
+        <p>🚀 <strong>Join 1,000+ students</strong> who’ve transformed from script kiddies to PowerShell ninjas!</p>
+        <p>💡 <strong>Why learn this?</strong> learning is hard but <strong>IGNORENCE</strong> is worse.</p>
+		<p> <strong>Everyone want to earn money but no one wants to learn the skill.</p>
+    </div>
+
+    <!-- Course Features -->
+    <div class="course-features">
+        <div class="feature">
+            <h3>🥋 Kung Fu Basics</h3>
+            <p>From zero to PowerShell black belt in 15 lethal lectures.</p>
+        </div>
+        <div class="feature">
+            <h3>🔐 Shadow Security</h3>
+            <p>Encrypt, audit, and harden scripts against dark forces.</p>
+        </div>
+        <div class="feature">
+            <h3>🤖 Automation Dojo</h3>
+            <p>Build scripts that fight repetitive tasks for you.</p>
+        </div>
+    </div>
+
+    <!-- Main Call-to-Action -->
+    <a href="lecture-1-intro.html" class="btn">Start when ready →</a>
+    <br>
+    <a href="https://github.com/Lab-of-Eden/powershell-tutorial" target="_blank" class="btn" style="background: var(--accent-yellow); color: var(--dark-bg);">
+        📜 Download Secret Scrolls (GitHub Scripts)
+    </a>
+
+    <!-- Social Sharing -->
+    <div class="social-share">
+        <p>🔥 <strong>Spread the knowledge!</strong> Share this course:</p>
+        <a href="https://twitter.com/intent/tweet?text=Master%20PowerShell%20like%20a%20ninja%20with%20%40LabOfEden%27s%20free%20course!%20%E2%9A%A1%EF%B8%8F%20Check%20it%20out%3A%20[YOUR-GITHUB-PAGES-URL]" target="_blank" class="social-btn twitter">🐦</a>
+        <a href="https://www.linkedin.com/shareArticle?mini=true&url=[YOUR-GITHUB-PAGES-URL]&title=PowerShell%20Kung%20Fu%20Course&summary=Learn%20PowerShell%20with%20a%20security%20focus!" target="_blank" class="social-btn linkedin">🔗</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=[YOUR-GITHUB-PAGES-URL]" target="_blank" class="social-btn facebook">📘</a>
+        <a href="https://wa.me/?text=Check%20out%20this%20awesome%20PowerShell%20course%3A%20[YOUR-GITHUB-PAGES-URL]" target="_blank" class="social-btn whatsapp">📱</a>
+    </div>
+	<p>For additional help, please contact support: labofeden@gamil.com</p>    
+	
+    <!-- Progress Tracker -->
+    <div id="progress-tracker" style="margin-top: 40px; display: none;">
+        <h3>Your Training Progress</h3>
+        <progress value="0" max="15" id="progress-bar"></progress>
+        <p id="progress-text">0/15 lectures completed</p>
+    </div>
+
+    <script>
+        // Progress tracking
+        if (localStorage.getItem('completedLectures')) {
+            const completed = JSON.parse(localStorage.getItem('completedLectures')).length;
+            document.getElementById('progress-tracker').style.display = 'block';
+            document.getElementById('progress-bar').value = completed;
+            document.getElementById('progress-text').textContent = `${completed}/15 lectures completed`;
+        }
+
+        // Replace [YOUR-GITHUB-PAGES-URL] with your actual GitHub Pages URL
+        const pageUrl = encodeURIComponent('https://lab-of-eden.github.io/powershell-tutorial/');
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.href = btn.href.replace('[YOUR-GITHUB-PAGES-URL]', pageUrl);
+        });
+
+        // ASCII Art on hover (optional)
+        document.querySelector('h1').addEventListener('mouseover', () => {
+            console.log('%c (•_•)\n<(╯°□°)╯︵ ┻━┻\n PowerShell Kung Fu!', 
+                'font-family: monospace; font-size: 14px; color: #64ffda;');
+        });
+    </script>
+</body>
+</html>
