@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 10: Capstone Challenge</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--accent-yellow);
+            border-bottom: 2px solid var(--accent-green);
+            text-align: center;
+        }
+        .mission {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 2px dashed var(--accent-yellow);
+        }
+        .analogy {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 3px solid var(--accent-green);
+        }
+        .code-block {
+            position: relative;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .copy-btn:hover {
+            background: var(--accent-green);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 2px solid var(--accent-blue);
+        }
+        .hint {
+            color: var(--accent-yellow);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏆 Lecture 10: PowerShell Capstone Challenge</h1>
+    <p>Combine everything you've learned into one ultimate security mission.</p>
+
+    <div class="mission">
+        <h2>🚨 Code Red Scenario: The Bank Heist</h2>
+        <p><strong>Situation:</strong> Hackers are attacking First National Bank. As their new security engineer, you must:</p>
+        
+        <div class="analogy">
+            <strong>🏦 Think of it like:</strong> Being the bank's head of security during a robbery - you need to lock doors, track the thieves, and protect the vaults - all at once!
+        </div>
+
+        <h3>Mission Objectives:</h3>
+        <ol>
+            <li><strong>Detect</strong> the attackers' entry point (like checking which door they forced open)</li>
+            <li><strong>Contain</strong> the breach (like locking internal security doors)</li>
+            <li><strong>Eradicate</strong> their tools (like confiscating burglars' equipment)</li>
+            <li><strong>Report</strong> all findings (like giving police a detailed statement)</li>
+        </ol>
+
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Start Mission</button>
+            <pre><code># BEGIN YOUR INVESTIGATION HERE
+function Invoke-BankDefense {
+    [CmdletBinding()]
+    param (
+        [datetime]$attackTime = (Get-Date).AddHours(-1)
+    )
+
+    # --------------------------
+    # PART 1: DETECT THE BREACH
+    # (Like reviewing security tapes)
+    # --------------------------
+
+    # Check for unusual logins (non-work hours)
+    $logons = Get-WinEvent -FilterHashtable @{
+        LogName='Security'
+        ID=4624 # Successful logon
+        StartTime=$attackTime.AddMinutes(-30)
+    } | Where-Object {
+        $_.TimeCreated.Hour -lt 8 -or $_.TimeCreated.Hour -gt 18
+    }
+
+    # --------------------------
+    # PART 2: CONTAIN THE DAMAGE
+    # (Like locking bank vault doors)
+    # --------------------------
+
+    # Isolate affected machines from network
+    $compromised = $logons | ForEach-Object { $_.Properties[5].Value }
+    $compromised | ForEach-Object {
+        Invoke-Command -ComputerName $_ -ScriptBlock {
+            Set-NetFirewallProfile -All -Enabled True
+            Set-NetFirewallRule -DisplayGroup "Remote Administration" -Enabled False
+        }
+    }
+
+    # --------------------------
+    # PART 3: ERADICATE TOOLS
+    # (Like removing burglars' tools)
+    # --------------------------
+
+    # Find and kill suspicious processes
+    $malicious = Get-Process | Where-Object {
+        $_.Path -notlike "*System32*" -and 
+        $_.Company -notmatch "Microsoft"
+    }
+    $malicious | Stop-Process -Force
+
+    # --------------------------
+    # PART 4: REPORT FINDINGS
+    # (Like filing a police report)
+    # --------------------------
+
+    $report = @"
+    BANK SECURITY INCIDENT REPORT
+    =============================
+    Detection Time: $(Get-Date)
+    Compromised Accounts: $($logons.Count)
+    Contained Systems: $($compromised -join ', ')
+    Removed Threats: $($malicious.Name -join ', ')
+"@
+    $report | Out-File "C:\Security\Incident_Report.txt"
+    Write-Host $report -ForegroundColor Cyan
+}</code></pre>
+        </div>
+
+        <div class="hint">
+            💡 <strong>Pro Tip:</strong> Use <code>Get-Help</code> on any command you forgot! This is your chance to apply all previous lessons.
+        </div>
+    </div>
+
+    <h2>🔍 Investigation Toolkit</h2>
+    <p>Remember these from past lectures? They'll help now:</p>
+    
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># From Lecture 6 (Forensics):
+Get-WinEvent -LogName Security -FilterXPath '*[System[EventID=4625]]' # Failed logins
+
+# From Lecture 7 (Malware):
+Get-Process | Where CPU -gt 90 # Find resource hogs
+
+# From Lecture 8 (Red Team):
+Test-NetConnection -ComputerName TARGET -Port 445 # Check attack paths
+
+# From Lecture 9 (Blue Team):
+Get-NetFirewallRule | Where Enabled -eq True # Verify defenses</code></pre>
+    </div>
+
+    <div class="analogy">
+        <strong>🧩 Think of it like:</strong> A final exam where you can use all your notes - the key is knowing which tool to use for each problem.
+    </div>
+
+    <h2>🎯 Extra Challenge: The CEO's Missing Laptop</h2>
+    <p><strong>Bonus Scenario:</strong> The CEO's laptop was stolen! Create a script that:</p>
+    <ol>
+        <li>Remotely wipes sensitive files (Documents, Desktop, Downloads)</li>
+        <li>Logs its last network location (Wi-Fi history)</li>
+        <li>Sends you a distress signal if it connects to the internet</li>
+    </ol>
+
+    <button onclick="showSolution()">Reveal Expert Solution</button>
+    <div id="solution" style="display: none;" class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Advanced solution for CEO laptop:
+function Invoke-LaptopKillswitch {
+    # 1. Wipe sensitive data
+    $folders = "Documents", "Desktop", "Downloads"
+    foreach ($folder in $folders) {
+        Get-ChildItem -Path "$env:USERPROFILE\$folder" -Recurse | 
+            Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+    }
+
+    # 2. Log network history
+    $wifi = netsh wlan show interfaces | Select-String "SSID"
+    $location = [PSCustomObject]@{
+        Time = Get-Date
+        SSID = ($wifi -split ":")[1].Trim()
+        IP = (Test-Connection -ComputerName $env:COMPUTERNAME -Count 1).IPv4Address
+    }
+    $location | Export-Csv -Path "$env:TEMP\last_location.csv" -NoTypeInformation
+
+    # 3. Create distress beacon
+    $beacon = {
+        while ($true) {
+            if (Test-NetConnection -ComputerName "8.8.8.8" -InformationLevel Quiet) {
+                $msg = "ALERT: Laptop online at $(Get-Date) - IP: $((Test-Connection -ComputerName $env:COMPUTERNAME -Count 1).IPv4Address)"
+                $msg | Out-File "\\CompanyServer\Security\stolen_laptop.txt" -Append
+                break
+            }
+            Start-Sleep -Seconds 300
+        }
+    }
+    Start-Job -ScriptBlock $beacon
+}</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-9-blueteam.html">← Previous: Blue Team</a>
+        <a href="completion.html">🏁 Course Complete! →</a>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function showSolution() {
+            const solution = document.getElementById('solution');
+            solution.style.display = 'block';
+            solution.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ASCII Trophy
+        console.log('%c   ___________\n  \'._==_==_=_.\'\n  .-\\:      /-.\n | (|:.     |) |\n  \'-|:.     |-\'\n    \\::.    /\n     \'::. .\'\n       ) (\n      \'.\' \n      \'_.\'\nCONGRATULATIONS!',
+                    'font-family: monospace; font-size: 14px; color: #ffd700;');
+    </script>
+</body>
+</html>
