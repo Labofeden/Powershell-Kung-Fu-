@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 4: Security Automation</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--accent-green);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+        h2 {
+            color: var(--accent-yellow);
+        }
+        .concept-box {
+            background: rgba(30, 144, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid var(--accent-blue);
+        }
+        .code-block {
+            position: relative;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--accent-green);
+            margin: 20px 0;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: var(--accent-green);
+            color: var(--dark-bg);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent-blue);
+        }
+        pre {
+            margin: 0;
+            overflow-x: auto;
+        }
+        .example-scenario {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lecture 4: Security Automation</h1>
+    
+    <div class="concept-box">
+        <h2>1. Scheduled Security Tasks</h2>
+        <p><strong>Theory:</strong> Automate repetitive security checks using Windows Task Scheduler. PowerShell scripts can run on schedules to monitor for changes.</p>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Create daily log analysis task
+$action = New-ScheduledTaskAction -Execute "PowerShell.exe" `
+    -Argument "-File `"C:\Security\analyze_logs.ps1`""
+$trigger = New-ScheduledTaskTrigger -Daily -At 3am
+Register-ScheduledTask -TaskName "Security Log Analysis" `
+    -Action $action -Trigger $trigger -User "SYSTEM"</code></pre>
+        </div>
+        
+        <div class="example-scenario">
+            <strong>🛡️ Real-World Use:</strong> Scan event logs every night for brute force attempts.
+        </div>
+    </div>
+
+    <div class="concept-box">
+        <h2>2. Automated Incident Response</h2>
+        <p><strong>Theory:</strong> Trigger PowerShell scripts when security events occur using Event Subscriptions.</p>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Trigger script on failed login (Event ID 4625)
+$query = @"
+&lt;QueryList&gt;
+  &lt;Query Id="0"&gt;
+    &lt;Select Path="Security"&gt;
+      *[System[(EventID=4625)]]
+    &lt;/Select&gt;
+  &lt;/Query&gt;
+&lt;/QueryList&gt;
+"@
+$subscription = New-WinEvent -Xml $query -MaxEvents 1 -Action {
+    & "C:\Security\block_bruteforce.ps1" -IP $event.Properties[19].Value
+}</code></pre>
+        </div>
+        
+        <div class="example-scenario">
+            <strong>🔥 Pro Tip:</strong> Combine with firewall rules to automatically block IPs after 5 failed attempts.
+        </div>
+    </div>
+
+    <div class="concept-box">
+        <h2>3. Secure API Integration</h2>
+        <p><strong>Theory:</strong> PowerShell can interact with security tools (VirusTotal, SIEMs) via REST APIs.</p>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Check file hash with VirusTotal
+$apiKey = "YOUR_API_KEY"
+$fileHash = (Get-FileHash "suspect.exe" -Algorithm SHA256).Hash
+
+$result = Invoke-RestMethod -Uri "https://www.virustotal.com/api/v3/files/$fileHash" `
+    -Headers @{"x-apikey"=$apiKey} `
+    -Method Get
+
+if ($result.data.attributes.last_analysis_stats.malicious -gt 0) {
+    Write-Warning "Malicious file detected!"
+    Move-Item "suspect.exe" "C:\Quarantine\" -Force
+}</code></pre>
+        </div>
+        
+        <div class="example-scenario">
+            <strong>🔐 Security Note:</strong> Always store API keys securely using <code>Export-CliXml</code> with encryption.
+        </div>
+    </div>
+
+    <h2>Challenge: The Security Automator</h2>
+    <ol>
+        <li>Create a script that automatically:</li>
+        <ul>
+            <li>Monitors for new files in <code>C:\Downloads\</code></li>
+            <li>Checks their hashes against VirusTotal (or a local hash DB)</li>
+            <li>Quarantines files with more than 3 AV detections</li>
+        </ul>
+        <li>Bonus: Generate a report with timestamp and action taken</li>
+    </ol>
+
+    <button onclick="showSolution()">Reveal Automation Technique</button>
+    <div id="solution" style="display: none;" class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Solution:
+$watcher = New-Object System.IO.FileSystemWatcher
+$watcher.Path = "C:\Downloads\"
+$watcher.Filter = "*.*"
+$watcher.IncludeSubdirectories = $true
+$watcher.EnableRaisingEvents = $true
+
+$action = {
+    $file = $Event.SourceEventArgs.FullPath
+    $hash = (Get-FileHash $file -Algorithm SHA256).Hash
+    
+    # Check against local hash DB (or VirusTotal)
+    $maliciousHashes = Import-Csv "C:\Security\malware_hashes.csv"
+    
+    if ($hash -in $maliciousHashes.SHA256) {
+        $quarantinePath = "C:\Quarantine\" + (Get-Date -Format "yyyyMMdd") + "\"
+        if (-not (Test-Path $quarantinePath)) {
+            New-Item -ItemType Directory -Path $quarantinePath | Out-Null
+        }
+        
+        Move-Item $file $quarantinePath -Force
+        "$(Get-Date -Format 'o')|QUARANTINED|$file|$hash" | Out-File "C:\Security\reports\log.txt" -Append
+    }
+}
+
+Register-ObjectEvent $watcher "Created" -Action $action</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-3-advanced.html">← Previous: Advanced Techniques</a>
+        <a href="lecture-5-defense.html">Next: Defensive PowerShell →</a>
+    </div>
+
+    <script>
+        // Copy code blocks
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function showSolution() {
+            const solution = document.getElementById('solution');
+            solution.style.display = 'block';
+            solution.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ASCII Art
+        console.log('%c  _____\n |__  /\n   / / \n  / /_ \n /____|\nAUTOMATE ALL THE THINGS!',
+                    'font-family: monospace; font-size: 14px; color: #64ffda;');
+    </script>
+</body>
+</html>
