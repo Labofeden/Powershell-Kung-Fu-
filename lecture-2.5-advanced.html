@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 2.5: Danger Zone</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+            --danger-red: #ff5555;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--danger-red);
+            border-bottom: 2px solid var(--danger-red);
+            text-shadow: 0 0 5px rgba(255, 85, 85, 0.3);
+        }
+        .danger-zone {
+            border: 2px solid var(--danger-red);
+            background: rgba(255, 85, 85, 0.1);
+            padding: 20px;
+            border-radius: 5px;
+            margin: 25px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .danger-zone::before {
+            content: "⚠️ DANGER ZONE ⚠️";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--danger-red);
+            color: black;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .safety-check {
+            border-left: 4px solid var(--accent-green);
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .code-editor {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--danger-red);
+            margin: 20px 0;
+        }
+        button.danger-btn {
+            background: var(--danger-red);
+            color: white;
+        }
+        button.safety-btn {
+            background: var(--accent-green);
+            color: var(--dark-bg);
+        }
+    </style>
+</head>
+<body>
+    <h1>Lecture 2.5: Dangerous Commands with Safety Checks</h1>
+
+    <div class="danger-zone">
+        <h2>1. File Deletion: The Nuclear Option</h2>
+        <p><strong>Dangerous Command:</strong></p>
+        <div class="code-editor">
+            <pre><code># DELETES ALL FILES RECURSIVELY - NO WARNINGS
+Remove-Item -Path "C:\Temp\" -Recurse -Force</code></pre>
+        </div>
+
+        <div class="safety-check">
+            <h3>🛡️ Safety Check:</h3>
+            <div class="code-editor">
+                <pre><code># SAFETY FIRST: Dry-run and confirmation
+$files = Get-ChildItem -Path "C:\Temp\" -Recurse
+Write-Host "About to delete $($files.Count) files"
+$confirm = Read-Host "Are you sure? (yes/no)"
+if ($confirm -eq "yes") {
+    Remove-Item -Path "C:\Temp\" -Recurse -Force -WhatIf
+    # Remove -WhatIf when actually ready
+}</code></pre>
+            </div>
+            <button class="safety-btn" onclick="runSafetyCheck()">Test Safety Script</button>
+            <div id="safety-output-1"></div>
+        </div>
+    </div>
+
+    <div class="danger-zone">
+        <h2>2. Network Recon: Walking the Edge</h2>
+        <p><strong>Dangerous Command:</strong></p>
+        <div class="code-editor">
+            <pre><code># PORT SCANNING - CAN TRIGGER SECURITY ALERTS
+1..1024 | ForEach-Object {
+    Test-NetConnection -ComputerName "target.com" -Port $_
+}</code></pre>
+        </div>
+
+        <div class="safety-check">
+            <h3>🛡️ Safety Check:</h3>
+            <div class="code-editor">
+                <pre><code># ETHICAL HACKING RULES:
+# 1. Get written permission
+# 2. Limit scan rate
+# 3. Only scan YOUR systems
+
+$target = Read-Host "Enter target (localhost for practice)"
+if ($target -ne "localhost") {
+    Write-Host "🚨 WARNING: Unauthorized scanning is illegal!" -ForegroundColor Red
+    exit
+}
+1..10 | ForEach-Object {  # Limited range for demo
+    Test-NetConnection -ComputerName $target -Port $_ -WarningAction SilentlyContinue
+}</code></pre>
+            </div>
+            <button class="safety-btn" onclick="runSafetyCheck()">Test Local Scan</button>
+            <div id="safety-output-2"></div>
+        </div>
+    </div>
+
+    <div class="danger-zone">
+        <h2>3. System Modification: Registry Risks</h2>
+        <p><strong>Dangerous Command:</strong></p>
+        <div class="code-editor">
+            <pre><code># REGISTRY EDIT - CAN BREAK YOUR SYSTEM
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" `
+                 -Name "HackerTool" -Value "C:\malware.exe"</code></pre>
+        </div>
+
+        <div class="safety-check">
+            <h3>🛡️ Safety Check:</h3>
+            <div class="code-editor">
+                <pre><code># SAFE REGISTRY PRACTICES:
+# 1. Always backup first
+# 2. Verify key exists
+# 3. Use -WhatIf for testing
+
+$regPath = "HKCU:\Software"  # Safer than HKLM
+if (-not (Test-Path $regPath)) {
+    Write-Host "Registry path not found!" -ForegroundColor Red
+    exit
+}
+
+# Backup before making changes
+$backupFile = "$env:TEMP\registry_backup.reg"
+reg export $regPath $backupFile
+
+# Then proceed with -WhatIf first
+Set-ItemProperty -Path $regPath -Name "TestKey" -Value "SafeValue" -WhatIf</code></pre>
+            </div>
+            <button class="safety-btn" onclick="runSafetyCheck()">Test Registry Safety</button>
+            <div id="safety-output-3"></div>
+        </div>
+    </div>
+
+    <h2>Challenge: The Safety Ninja</h2>
+    <ol>
+        <li>Write a script that <strong>lists all processes</strong> but excludes system-critical ones</li>
+        <li>Add a <strong>confirmation prompt</strong> before showing any process with "svchost"</li>
+        <li>Color-code output: <span style="color:green">Safe</span> vs <span style="color:red">Dangerous</span></li>
+    </ol>
+
+    <button class="safety-btn" onclick="showSolution()">Reveal Safety Technique</button>
+    <div id="solution" style="display: none;" class="code-editor">
+        <pre><code># Solution:
+$critical = @("System", "Registry", "smss", "csrss")
+
+Get-Process | ForEach-Object {
+    if ($critical -contains $_.ProcessName) {
+        Write-Host "[☠️ DANGER] " -NoNewline -ForegroundColor Red
+        Write-Host "$($_.ProcessName) (PID: $($_.Id))" -ForegroundColor Red
+    }
+    elseif ($_.ProcessName -eq "svchost") {
+        $confirm = Read-Host "Show svchost process? (yes/no)"
+        if ($confirm -eq "yes") {
+            Write-Host "[⚠️ CAUTION] " -NoNewline -ForegroundColor Yellow
+            Write-Host "$($_.ProcessName) (PID: $($_.Id))"
+        }
+    }
+    else {
+        Write-Host "[✅ SAFE] " -NoNewline -ForegroundColor Green
+        Write-Host "$($_.ProcessName)"
+    }
+}</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-2-basics.html">← Back to Basics</a>
+        <a href="lecture-3-advanced.html">Next: Advanced Techniques →</a>
+    </div>
+
+    <script>
+        function runSafetyCheck() {
+            // Simulated outputs for each safety check
+            const output1 = document.getElementById('safety-output-1');
+            const output2 = document.getElementById('safety-output-2');
+            const output3 = document.getElementById('safety-output-3');
+            
+            if (output1) output1.innerHTML = 
+                `<pre style="color: var(--accent-green)">About to delete 42 files\nWhat if: Performing operation "Remove Directory" on target "C:\Temp\"</pre>`;
+            
+            if (output2) output2.innerHTML = 
+                `<pre style="color: var(--accent-green)">ComputerName   : localhost\nRemotePort    : 80\nTcpTestSucceeded : True</pre>`;
+            
+            if (output3) output3.innerHTML = 
+                `<pre style="color: var(--accent-green)">What if: Performing operation "Set Property" on target "Item: HKCU:\Software\TestKey".</pre>`;
+        }
+
+        function showSolution() {
+            document.getElementById('solution').style.display = 'block';
+        }
+
+        // ASCII Skull Warning
+        console.log('%c   _____\n  /     \\\n | () () |\n  \\  ^  /\n   |||||\n   |||||',
+                    'font-family: monospace; font-size: 14px; color: #ff5555;');
+    </script>
+</body>
+</html>
