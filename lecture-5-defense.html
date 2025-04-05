@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 5: Defensive PowerShell</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+            --danger-red: #ff5555;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--accent-green);
+            border-bottom: 2px solid var(--danger-red);
+        }
+        .defense-card {
+            background: rgba(30, 144, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid var(--accent-blue);
+        }
+        .analogy {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-style: italic;
+        }
+        .code-block {
+            position: relative;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background: var(--accent-green);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent-blue);
+        }
+        .warning {
+            color: var(--danger-red);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Lecture 5: Defensive PowerShell</h1>
+    <p>Learn how to protect your system from PowerShell-based attacks.</p>
+
+    <!-- Defense 1: Logging -->
+    <div class="defense-card">
+        <h2>1. PowerShell Logging</h2>
+        <p><strong>Why it matters:</strong> Just like security cameras record everything in a store, PowerShell logging keeps records of all PowerShell activity.</p>
+        
+        <div class="analogy">
+            <strong>🔍 Think of it like:</strong> A flight recorder (black box) for PowerShell - it helps you investigate what went wrong after an attack.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Turn on PowerShell's "security camera"
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell" `
+    -Name "EnableScriptBlockLogging" -Value 1
+
+# Check if logging is working
+Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" -MaxEvents 5 | 
+    Select-Object TimeCreated, Message</code></pre>
+        </div>
+        <p class="warning">⚠️ Without logging, attackers can use PowerShell invisibly!</p>
+    </div>
+
+    <!-- Defense 2: Execution Policy -->
+    <div class="defense-card">
+        <h2>2. Execution Policy</h2>
+        <p><strong>Why it matters:</strong> This is like a bouncer at a club - it decides which scripts are allowed to run.</p>
+        
+        <div class="analogy">
+            <strong>🚧 Think of it like:</strong> Your computer's immune system - it blocks unknown scripts that might be harmful.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Set a good balance of security and usability
+Set-ExecutionPolicy RemoteSigned -Scope LocalMachine
+
+# What this means:
+# - Allows your own scripts to run
+# - Blocks downloaded scripts unless they're signed
+# - Still lets you run individual commands</code></pre>
+        </div>
+        <p>🔐 <strong>Pro Tip:</strong> Use <code>AllSigned</code> for maximum security (but requires all scripts to be signed).</p>
+    </div>
+
+    <!-- Defense 3: Constrained Language Mode -->
+    <div class="defense-card">
+        <h2>3. Constrained Language Mode</h2>
+        <p><strong>Why it matters:</strong> This puts PowerShell in a "safe mode" where dangerous commands are blocked.</p>
+        
+        <div class="analogy">
+            <strong>🧸 Think of it like:</strong> Child-proofing your house - sharp objects (dangerous commands) are locked away.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Enable for specific users (like web servers)
+$registryPath = "HKLM:\SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell"
+Set-ItemProperty -Path $registryPath -Name "ExecutionPolicy" -Value "Restricted"
+
+# Verify the mode
+$ExecutionContext.SessionState.LanguageMode</code></pre>
+        </div>
+        <p>🛡️ <strong>Blocks:</strong> File system access, registry changes, and other risky operations.</p>
+    </div>
+
+    <h2>🛠️ Defense Lab: Secure Your First Server</h2>
+    <p>Your IT manager asks you to secure a server. Here's what to do:</p>
+    <ol>
+        <li>Enable logging to detect attacks</li>
+        <li>Set execution policy to prevent random scripts from running</li>
+        <li>Bonus: Block PowerShell v2 (old and dangerous version)</li>
+    </ol>
+
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Start your defense script here:
+function Protect-MyServer {
+    # Step 1: Enable logging
+    
+    # Step 2: Set execution policy
+    
+    # Step 3: Disable PowerShell v2 (bonus)
+}</code></pre>
+    </div>
+
+    <button onclick="showSolution()">Show Me How</button>
+    <div id="solution" style="display: none;" class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Complete solution:
+function Protect-MyServer {
+    # 1. Enable logging
+    $logPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell"
+    if (-not (Test-Path $logPath)) {
+        New-Item $logPath -Force | Out-Null
+    }
+    Set-ItemProperty $logPath -Name "EnableScriptBlockLogging" -Value 1
+
+    # 2. Set execution policy
+    Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
+
+    # 3. Disable PowerShell v2 (if exists)
+    if (Get-WindowsOptionalFeature -Online -FeatureName "MicrosoftWindowsPowerShellV2" -ErrorAction SilentlyContinue) {
+        Disable-WindowsOptionalFeature -Online -FeatureName "MicrosoftWindowsPowerShellV2" -NoRestart
+    }
+
+    Write-Host "Server is now secured!" -ForegroundColor Green
+}</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-4-automation.html">← Previous: Automation</a>
+        <a href="lecture-6-forensics.html">Next: PowerShell Forensics →</a>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function showSolution() {
+            const solution = document.getElementById('solution');
+            solution.style.display = 'block';
+            solution.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ASCII Art
+        console.log('%c   .-.   \n  (0.0)  \n  |=|    \n  |||    \n  |||    \nPROTECTED',
+                    'font-family: monospace; font-size: 14px; color: #64ffda;');
+    </script>
+</body>
+</html>
