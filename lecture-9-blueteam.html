@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 9: Blue Team Defense</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-green);
+        }
+        .defense-card {
+            background: rgba(30, 144, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid var(--accent-blue);
+        }
+        .analogy {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-style: italic;
+            border-left: 3px solid var(--accent-green);
+        }
+        .code-block {
+            position: relative;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background: var(--accent-green);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent-blue);
+        }
+        .protect-tip {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Lecture 9: Blue Team PowerShell</h1>
+    <p>Learn how defenders use PowerShell to protect systems and detect attacks.</p>
+
+    <!-- Defense 1: Attack Detection -->
+    <div class="defense-card">
+        <h2>1. Detecting Attacks</h2>
+        <p><strong>Why it matters:</strong> Just like a security guard reviews camera footage, defenders analyze logs to spot intruders.</p>
+        
+        <div class="analogy">
+            <strong>🔍 Think of it like:</strong> Checking your home's security cameras for anyone trying to pick your lock.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Find unusual PowerShell activity (Attackers often use PS!)
+Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" -MaxEvents 50 |
+    Where-Object { $_.Id -eq 4104 } | # Script block execution
+    Select-Object TimeCreated, Message |
+    Where-Object { $_.Message -match "DownloadString|Invoke-" } # Common attack commands
+
+# Check for abnormal login times (Attackers often work nights)
+$logons = Get-WinEvent -FilterHashtable @{
+    LogName='Security'
+    ID=4624 # Successful logon
+} -MaxEvents 100
+$logons | Where-Object { $_.TimeCreated.Hour -gt 20 -or $_.TimeCreated.Hour -lt 6 }</code></pre>
+        </div>
+        <p class="protect-tip">💡 <strong>Pro Tip:</strong> Attackers often use PowerShell at 3AM when no one's watching!</p>
+    </div>
+
+    <!-- Defense 2: System Hardening -->
+    <div class="defense-card">
+        <h2>2. Locking the Doors</h2>
+        <p><strong>Why it matters:</strong> You wouldn't leave your house with windows open. Similarly, we close system vulnerabilities.</p>
+        
+        <div class="analogy">
+            <strong>🔒 Think of it like:</strong> Installing deadbolts and alarm systems before burglars show up.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Disable dangerous PowerShell features
+Disable-PSRemoting -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\PowerShell\1\ShellIds" -Name "ExecutionPolicy" -Value "Restricted"
+
+# Remove common attack tools
+Remove-Item -Path "$env:SystemRoot\System32\WindowsPowerShell\v1.0\Modules\BitsTransfer" -Recurse -Force -ErrorAction SilentlyContinue
+
+# Check firewall rules (Ensure only needed ports are open)
+Get-NetFirewallRule | 
+    Where-Object { $_.Enabled -eq "True" -and $_.Direction -eq "Inbound" } |
+    Select-Object DisplayName, Profile, Action</code></pre>
+        </div>
+        <p class="protect-tip">🛡️ <strong>Defense Strategy:</strong> The more doors you lock, the harder attackers have to work!</p>
+    </div>
+
+    <!-- Defense 3: Active Monitoring -->
+    <div class="defense-card">
+        <h2>3. Setting Up Alarms</h2>
+        <p><strong>Why it matters:</strong> Just as smoke detectors alert you to fires, we create alerts for suspicious activity.</p>
+        
+        <div class="analogy">
+            <strong>🚨 Think of it like:</strong> Installing motion sensors that text you when someone enters your backyard at night.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Create real-time process monitor
+Register-WmiEvent -Query "SELECT * FROM Win32_ProcessStartTrace" -Action {
+    $e = $Event.SourceEventArgs.NewEvent
+    if ($e.ParentProcessName -eq "powershell.exe" -and $e.ProcessName -ne "conhost.exe") {
+        $alert = "Suspicious process spawned by PowerShell: $($e.ProcessName) (PID: $($e.ProcessId))"
+        $alert | Out-File "C:\Alerts\process_alerts.txt" -Append
+        Send-MailMessage -To "security@yourcompany.com" -Subject "ALERT" -Body $alert
+    }
+}
+
+# Monitor for new scheduled tasks (Attackers love persistence)
+$existingTasks = Get-ScheduledTask | Select-Object TaskName
+$watcher = New-Object System.IO.FileSystemWatcher
+$watcher.Path = "$env:SystemRoot\System32\Tasks"
+$watcher.NotifyFilter = [System.IO.NotifyFilters]::FileName
+$watcher.EnableRaisingEvents = $true
+$watcher.Created += {
+    $newTasks = Compare-Object (Get-ScheduledTask | Select-Object TaskName) $existingTasks
+    if ($newTasks) { Write-Host "New task detected: $($newTasks.TaskName)" -ForegroundColor Red }
+}</code></pre>
+        </div>
+        <p class="protect-tip">👁️ <strong>Monitoring Rule:</strong> If PowerShell spawns anything besides itself or conhost, investigate!</p>
+    </div>
+
+    <h2>🛡️ Defense Lab: The Midnight Intruder</h2>
+    <p><strong>Scenario:</strong> Your security camera shows someone logged into a server at 2AM. Investigate:</p>
+    <ol>
+        <li>Check what they did (PowerShell logs)</li>
+        <li>See if they left anything behind (new files/processes)</li>
+        <li>Close any doors they opened (disable compromised accounts)</li>
+    </ol>
+
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Start your defense script here:
+function Investigate-Intruder {
+    param([datetime]$attackTime)
+    
+    # Step 1: Check PowerShell activity during attack window
+    
+    # Step 2: Find new files/processes
+    
+    # Step 3: Identify compromised accounts
+}</code></pre>
+    </div>
+
+    <button onclick="showSolution()">Show Defense Protocol</button>
+    <div id="solution" style="display: none;" class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Complete defense solution:
+function Investigate-Intruder {
+    param([datetime]$attackTime)
+    
+    # 1. Check PowerShell activity
+    $psEvents = Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" |
+        Where-Object { $_.TimeCreated -ge $attackTime.AddMinutes(-5) -and 
+                      $_.TimeCreated -le $attackTime.AddMinutes(30) }
+    $psEvents | Export-Csv "C:\Investigation\ps_activity.csv"
+
+    # 2. Find new artifacts
+    $suspiciousFiles = Get-ChildItem -Path C:\ -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.CreationTime -ge $attackTime } |
+        Select-Object FullName, CreationTime
+    $suspiciousFiles | Export-Csv "C:\Investigation\new_files.csv"
+
+    $suspiciousProcesses = Get-Process |
+        Where-Object { $_.StartTime -ge $attackTime } |
+        Select-Object Name, Id, StartTime, Path
+    $suspiciousProcesses | Export-Csv "C:\Investigation\new_processes.csv"
+
+    # 3. Identify compromised accounts
+    $lateLogons = Get-WinEvent -FilterHashtable @{
+        LogName='Security'
+        ID=4624 # Successful logon
+        StartTime=$attackTime.AddHours(-1)
+        EndTime=$attackTime.AddHours(1)
+    } | Select-Object TimeCreated, @{n='User';e={$_.Properties[5].Value}}
+
+    Write-Host "Investigation complete. Reports saved to C:\Investigation\" -ForegroundColor Green
+    $lateLogons | Format-Table -AutoSize
+}</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-8-redteam.html">← Previous: Red Team</a>
+        <a href="lecture-10-capstone.html">Next: Final Capstone →</a>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function showSolution() {
+            const solution = document.getElementById('solution');
+            solution.style.display = 'block';
+            solution.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ASCII Shield
+        console.log('%c   .-.   \n  (o.o)  \n  |=|    \n __|__   \nDEFENSE MODE',
+                    'font-family: monospace; font-size: 14px; color: #1e90ff;');
+    </script>
+</body>
+</html>
