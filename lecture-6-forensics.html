@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 6: PowerShell Forensics</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--accent-green);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+        .forensic-card {
+            background: rgba(30, 144, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid var(--accent-yellow);
+        }
+        .analogy {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-style: italic;
+        }
+        .code-block {
+            position: relative;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background: var(--accent-green);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent-blue);
+        }
+        .clue {
+            color: var(--accent-yellow);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Lecture 6: PowerShell Forensics</h1>
+    <p>Learn how to investigate attacks and find hidden evidence using PowerShell.</p>
+
+    <!-- Technique 1: Log Analysis -->
+    <div class="forensic-card">
+        <h2>1. Investigating Event Logs</h2>
+        <p><strong>Why it matters:</strong> Event logs are like a security camera recording for your computer. They show who did what and when.</p>
+        
+        <div class="analogy">
+            <strong>🕵️ Think of it like:</strong> Reading a detective's notebook - the logs tell the story of what happened during an attack.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Find failed login attempts (Common attack sign)
+Get-WinEvent -LogName Security -FilterXPath `
+    '*[System[EventID=4625]]' -MaxEvents 10 | 
+    Select-Object TimeCreated, 
+        @{n='User';e={$_.Properties[5].Value}},
+        @{n='SourceIP';e={$_.Properties[19].Value}}
+
+# Check for PowerShell attacks
+Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" |
+    Where-Object {$_.Id -eq "4104"} | 
+    Select-Object -First 5</code></pre>
+        </div>
+        <p class="clue">💡 <strong>Forensic Clue:</strong> Look for Event ID 4688 (new processes) with PowerShell spawning from unexpected programs like Word.</p>
+    </div>
+
+    <!-- Technique 2: File System Forensics -->
+    <div class="forensic-card">
+        <h2>2. Hunting Suspicious Files</h2>
+        <p><strong>Why it matters:</strong> Attackers often leave malicious files behind. Finding them quickly can stop further damage.</p>
+        
+        <div class="analogy">
+            <strong>📁 Think of it like:</strong> Searching for fingerprints at a crime scene - unusual files are the attacker's fingerprints.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Find recently modified files (Last 3 days)
+$cutoff = (Get-Date).AddDays(-3)
+Get-ChildItem -Path C:\ -Recurse -ErrorAction SilentlyContinue |
+    Where-Object {$_.LastWriteTime -ge $cutoff} |
+    Select-Object FullName, LastWriteTime, Length |
+    Export-Csv -Path "C:\Investigation\recent_files.csv"
+
+# Find hidden files in temp folders
+Get-ChildItem -Path $env:TEMP -Force |
+    Where-Object {$_.Attributes -match "Hidden"} |
+    Select-Object Name, CreationTime</code></pre>
+        </div>
+        <p class="clue">💡 <strong>Forensic Clue:</strong> Malware often uses double extensions like <code>document.pdf.exe</code></p>
+    </div>
+
+    <!-- Technique 3: Memory Forensics -->
+    <div class="forensic-card">
+        <h2>3. Analyzing Running Processes</h2>
+        <p><strong>Why it matters:</strong> Malware hides in your computer's memory. Finding it there can reveal active attacks.</p>
+        
+        <div class="analogy">
+            <strong>🧠 Think of it like:</strong> Checking people's IDs at a party - legitimate processes have proper signatures, malware doesn't.
+        </div>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Find suspicious processes
+Get-Process | 
+    Where-Object {$_.CPU -gt 50 -or $_.Path -notlike "*System32*"} |
+    Select-Object Name, Id, CPU, Path,
+        @{n='DigitalSignature';e={
+            (Get-AuthenticodeSignature $_.Path).Status
+        }}
+
+# Check network connections
+Get-NetTCPConnection | 
+    Where-Object {$_.State -eq "Established"} |
+    Select-Object LocalAddress, LocalPort, RemoteAddress, RemotePort,
+        @{n='Process';e={(Get-Process -Id $_.OwningProcess).Name}}</code></pre>
+        </div>
+        <p class="clue">💡 <strong>Forensic Clue:</strong> Processes with high CPU but no digital signature are suspicious.</p>
+    </div>
+
+    <h2>🕵️ Forensic Lab: Investigate a Hack</h2>
+    <p>Your boss reports unusual activity on a server. Find evidence:</p>
+    <ol>
+        <li>Check for odd processes running</li>
+        <li>Look for recently created files in Temp folders</li>
+        <li>Find any failed login attempts</li>
+    </ol>
+
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Start your investigation here:
+function Investigate-Attack {
+    # Step 1: Check processes
+    
+    # Step 2: Check temp files
+    
+    # Step 3: Check security logs
+}</code></pre>
+    </div>
+
+    <button onclick="showSolution()">Need Help?</button>
+    <div id="solution" style="display: none;" class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Complete investigation script:
+function Investigate-Attack {
+    $report = @()
+    
+    # 1. Check processes
+    $suspiciousProcesses = Get-Process | 
+        Where-Object {
+            $_.Path -notlike "*System32*" -and 
+            $_.Company -notmatch "Microsoft"
+        } |
+        Select-Object Name, Id, Path, Company
+    $report += "=== Suspicious Processes ===`n$($suspiciousProcesses | Out-String)"
+
+    # 2. Check temp files
+    $recentFiles = Get-ChildItem -Path $env:TEMP -Recurse |
+        Where-Object {$_.CreationTime -gt (Get-Date).AddHours(-24)} |
+        Select-Object FullName, CreationTime
+    $report += "=== Recent Temp Files ===`n$($recentFiles | Out-String)"
+
+    # 3. Check security logs
+    $failedLogins = Get-WinEvent -LogName Security -FilterXPath '*[System[EventID=4625]]' -MaxEvents 5 |
+        Select-Object TimeCreated,
+            @{n='User';e={$_.Properties[5].Value}},
+            @{n='SourceIP';e={$_.Properties[19].Value}}
+    $report += "=== Failed Logins ===`n$($failedLogins | Out-String)"
+
+    # Save report
+    $report | Out-File "C:\Investigation\Report_$(Get-Date -Format 'yyyyMMdd').txt"
+    Write-Host "Investigation complete! Report saved." -ForegroundColor Green
+}</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-5-defense.html">← Previous: Defensive PowerShell</a>
+        <a href="lecture-7-malware.html">Next: Malware Analysis →</a>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        function showSolution() {
+            const solution = document.getElementById('solution');
+            solution.style.display = 'block';
+            solution.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ASCII Art
+        console.log('%c   ___   \n  / _ \  \n | (_) | \n  \___/  \nDETECTIVE MODE',
+                    'font-family: monospace; font-size: 14px; color: #ffd700;');
+    </script>
+</body>
+</html>
