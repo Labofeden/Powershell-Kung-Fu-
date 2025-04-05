@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Kung Fu - Lecture 2: Basics</title>
+    <style>
+        :root {
+            --dark-bg: #0a192f;
+            --accent-green: #64ffda;
+            --accent-yellow: #ffd700;
+            --accent-blue: #1e90ff;
+            --text-light: #ccd6f6;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--accent-green);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+        h2 {
+            color: var(--accent-yellow);
+        }
+        .code-editor {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--accent-green);
+            margin: 20px 0;
+            position: relative;
+        }
+        .code-editor::after {
+            content: "PS >";
+            position: absolute;
+            left: 10px;
+            top: 15px;
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+        textarea {
+            background: transparent;
+            color: white;
+            border: none;
+            width: 100%;
+            padding-left: 40px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 100px;
+        }
+        button {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent-blue);
+        }
+        #output {
+            background: #000;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .danger-zone {
+            border: 1px solid #ff5555;
+            background: rgba(255, 85, 85, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 25px 0;
+        }
+        .danger-zone h3 {
+            color: #ff5555;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lecture 2: PowerShell Basics & Secure Scripting</h1>
+
+    <div class="code-editor">
+        <pre><code># Your training intensifies. Today you'll learn:
+# - Variables and data types
+# - Secure credential handling
+# - Safe script execution</code></pre>
+    </div>
+
+    <h2>1. Variables: The Ninja's Scrolls</h2>
+    <p>Store data for later use with <span style="color: var(--accent-green)">$variables</span>:</p>
+    <div class="code-editor">
+        <textarea id="var-code"># Store your secret weapon name
+$weapon = "Cyber Katana"
+Write-Host "My weapon: $weapon" -ForegroundColor Yellow</textarea>
+        <button onclick="runCode('var')">Execute</button>
+        <div id="var-output"></div>
+    </div>
+
+    <h2>2. Secure Credential Handling</h2>
+    <div class="danger-zone">
+        <h3>⚠️ Danger Zone</h3>
+        <p>Never store passwords in plain text! Use <span style="color: var(--accent-green)">Get-Credential</span>:</p>
+        <div class="code-editor">
+            <pre><code># Safe method
+$cred = Get-Credential -Message "Enter your ninja credentials"
+$cred.Password | ConvertFrom-SecureString | Out-File "C:\secrets\encrypted_pw.txt"</code></pre>
+        </div>
+    </div>
+
+    <h2>3. Script Parameters: The Ninja's Flexibility</h2>
+    <div class="code-editor">
+        <textarea id="param-code">param (
+    [string]$target = "localhost",
+    [int]$port = 80
+)
+Write-Host "Scanning $target on port $port" -ForegroundColor Cyan</textarea>
+        <button onclick="runCode('param')">Test Script</button>
+        <div id="param-output"></div>
+    </div>
+
+    <h2>Challenge: The Credential Vault</h2>
+    <ol>
+        <li>Create a script that accepts a <span style="color: var(--accent-green)">-username</span> parameter</li>
+        <li>Securely prompt for a password using <span style="color: var(--accent-green)">Get-Credential</span></li>
+        <li>Display the username in blue and mask the password (show only first/last chars)</li>
+    </ol>
+
+    <button onclick="showSolution()">Reveal Secret Technique</button>
+    <div id="solution" style="display: none;" class="code-editor">
+        <pre><code># Solution:
+param (
+    [string]$username
+)
+
+$cred = Get-Credential -UserName $username -Message "Enter your secret passphrase"
+$pass = $cred.GetNetworkCredential().Password
+$maskedPass = $pass[0] + ("*" * ($pass.Length - 2)) + $pass[-1]
+
+Write-Host "Username:" -ForegroundColor Blue -NoNewline
+Write-Host " $username"
+Write-Host "Password:" -ForegroundColor Red -NoNewline
+Write-Host " $maskedPass"</code></pre>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture-1-intro.html">← Previous: Introduction</a>
+        <a href="lecture-2.5-advanced.html">Next: Advanced Techniques →</a>
+    </div>
+
+    <script>
+        // Simulated code execution
+        function runCode(type) {
+            const code = document.getElementById(`${type}-code`).value;
+            const output = document.getElementById(`${type}-output`);
+            
+            // Simulate different command outputs
+            if (type === 'var') {
+                output.innerHTML = `<span style="color: var(--accent-yellow)">My weapon: Cyber Katana</span>`;
+            } 
+            else if (type === 'param') {
+                output.innerHTML = `<span style="color: var(--accent-blue)">> Scanning localhost on port 80</span>`;
+            }
+            
+            // Track progress
+            updateProgress();
+        }
+
+        function showSolution() {
+            document.getElementById('solution').style.display = 'block';
+            updateProgress();
+        }
+
+        function updateProgress() {
+            if (!localStorage.getItem('completedLectures')) {
+                localStorage.setItem('completedLectures', JSON.stringify([]));
+            }
+            let completed = JSON.parse(localStorage.getItem('completedLectures'));
+            if (!completed.includes(2)) {
+                completed.push(2);
+                localStorage.setItem('completedLectures', JSON.stringify(completed));
+            }
+        }
+
+        // ASCII Art
+        console.log('%c   ____\n  /___/_\n //   / \\\n||    | |\n \\\\___\\_/',
+                    'font-family: monospace; font-size: 14px; color: #ffd700;');
+    </script>
+</body>
+</html>
