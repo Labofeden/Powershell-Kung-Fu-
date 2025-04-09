@@ -1,2 +1,2 @@
 # powershell scripting tutorial 
-https://labofeden.github.io/Powershell-Kung-Fu-/
+https://labofeden.github.io/tutorial-with-labofeden/
