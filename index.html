@@ -3,202 +3,540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerShell Kung Fu: Code + Security</title>
+    <title>Lab of Eden | Defiant Innovation</title>
     <style>
+        /* CSS Variables */
         :root {
-            --dark-bg: #0a192f;
-            --accent-green: #64ffda;
-            --accent-yellow: #ffd700;
-            --accent-blue: #1e90ff;
-            --text-light: #ccd6f6;
+            --primary: #1a2e35;
+            --secondary: #2d545e;
+            --accent: #c17c74;
+            --light: #e7f1f5;
+            --dark: #0d1b21;
+            --text: #333;
+            --text-light: #f8f9fa;
         }
+        
+        /* Base Styles */
         body {
-            font-family: 'Courier New', monospace;
-            background: var(--dark-bg);
-            color: var(--text-light);
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background-color: var(--light);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+        
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            margin-top: 0;
+        }
+        
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--secondary);
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: var(--text-light);
+            padding: 6rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            display: inline-block;
+            background: linear-gradient(to right, var(--accent), #d88c79);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            font-style: italic;
+            max-width: 800px;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .founder {
+            display: flex;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        
+        .founder img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+            border: 2px solid var(--accent);
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(13, 27, 33, 0.95);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+        
+        /* Sections */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+        }
+        
+        /* About Section */
+        .about-quote {
+            font-size: 1.8rem;
+            font-style: italic;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+            border-left: 4px solid var(--accent);
+        }
+        
+        /* Philosophy Section */
+        .philosophy-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .philosophy-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .philosophy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .philosophy-card h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        /* Focus Areas */
+        .focus-areas {
+            background-color: var(--primary);
+            color: var(--text-light);
+        }
+        
+        .focus-areas .section-title {
+            color: var(--text-light);
+        }
+        
+        .focus-areas .section-title:after {
+            background: var(--accent);
+        }
+        
+        .focus-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .focus-card {
+            background-color: rgba(255,255,255,0.05);
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            transition: all 0.3s ease;
+        }
+        
+        .focus-card:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateY(-5px);
+        }
+        
+        .focus-card h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .focus-card ul {
+            padding-left: 1.5rem;
+        }
+        
+        .focus-card li {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Vision Section */
+        .vision-statement {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: var(--secondary);
+        }
+        
+        /* Who We're For Section */
+        .audience-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .audience-card {
+            text-align: center;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .audience-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: var(--text-light);
+            padding: 4rem 2rem;
             text-align: center;
         }
-        h1 {
-            color: var(--accent-green);
-            border-bottom: 2px solid var(--accent-blue);
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
             display: inline-block;
+            background: linear-gradient(to right, var(--accent), #d88c79);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .profile-img {
-            width: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--accent-green);
-            box-shadow: 0 0 15px var(--accent-blue);
+        
+        .contact-info {
+            margin: 2rem 0;
         }
-        .btn {
-            background: var(--accent-blue);
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            margin: 15px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
-        }
-        .course-features {
+        
+        .social-links {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 25px;
-            margin: 40px 0;
+            gap: 1.5rem;
+            margin: 2rem 0;
         }
-        .feature {
-            background: rgba(30, 144, 255, 0.1);
-            padding: 20px;
-            border-radius: 8px;
-            width: 220px;
-            border-left: 4px solid var(--accent-green);
-            transition: all 0.3s;
+        
+        .social-links a {
+            color: var(--text-light);
+            font-size: 1.5rem;
         }
-        .feature:hover {
-            transform: scale(1.05);
-            background: rgba(30, 144, 255, 0.2);
+        
+        .copyright {
+            opacity: 0.7;
+            font-size: 0.9rem;
         }
-        .logos {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 30px 0;
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .logo {
-            height: 60px;
-            filter: drop-shadow(0 0 5px var(--accent-green));
+        
+        .fade-in {
+            animation: fadeIn 1s ease forwards;
         }
-        .bio {
-            max-width: 600px;
-            margin: 20px auto;
-            font-style: italic;
-            color: var(--accent-yellow);
-        }
-        .social-share {
-            margin: 30px 0;
-        }
-        .social-btn {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            margin: 0 10px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            color: white;
-            line-height: 40px;
-            transition: all 0.3s;
-        }
-        .social-btn:hover {
-            transform: scale(1.2);
-        }
-        .twitter { background: #1DA1F2; }
-        .linkedin { background: #0077B5; }
-        .facebook { background: #4267B2; }
-        .whatsapp { background: #25D366; }
-        .cta-text {
-            font-size: 1.2em;
-            margin: 20px 0;
-            color: var(--accent-yellow);
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            header {
+                padding: 5rem 0 3rem;
+            }
+            
+            section {
+                padding: 3rem 1.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- PowerShell Logo --> 
-    <div class="logos">
-        <img src="https://github.com/Labofeden/Powershell-Kung-Fu-/blob/main/labofedenlogo.jpg" alt="PowerShell Kung Fu" class="logo">
-        <img src="/Users/Newton/Desktop/POWERSHELL/powershell.png" alt="Lab of Eden" class="logo">
-    </div>
-    <h1>Free powershell Caurse.In Lab of Eden(LoE) we dont sell knoledge</h1>
-    <h2>PowerShell Kung Fu: Code + Security</h2>
-    <p class="bio">Master the art of PowerShell automation and protect Computers and systems from data breaches. Do it like a digital ninja.</p>
-
-    <!-- Developer Profile -->
-    <div>
-        <img src="https://github.com/Labofeden/Powershell-Kung-Fu-/blob/main/passport%20%2B.png" alt="developer" class="profile-img">
-        <h2>Newton</h2>
-        <p>🔥 <em>"Cybersecurity and Automation specialist, AI enthosist,HealthTech and database Atitech"</em></p>
-        <p>Powered by <strong>Lab of Eden</strong></p>
-        <a href="https://github.com/Lab-of-Eden" target="_blank" class="btn" style="background: var(--accent-green);">
-            <span style="color: var(--dark-bg);">⚡ GitHub</span>
-        </a>
-    </div>
-
-    <!-- Persuasive Call-to-Action -->
-    <div class="cta-text">
-        <p>🚀 <strong>Join 1,000+ students</strong> who’ve transformed from script kiddies to PowerShell ninjas!</p>
-        <p>💡 <strong>Why learn this?</strong> learning is hard but <strong>IGNORENCE</strong> is worse.</p>
-		<p> <strong>Everyone want to earn money but no one wants to learn the skill.</p>
-    </div>
-
-    <!-- Course Features -->
-    <div class="course-features">
-        <div class="feature">
-            <h3>🥋 Kung Fu Basics</h3>
-            <p>From zero to PowerShell black belt in 15 lethal lectures.</p>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Lab of Eden</div>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#philosophy">Philosophy</a>
+            <a href="#focus">Focus Areas</a>
+            <a href="#vision">Vision</a>
+            <a href="#audience">Who We're For</a>
+            <a href="#contact">Contact</a>
         </div>
-        <div class="feature">
-            <h3>🔐 Shadow Security</h3>
-            <p>Encrypt, audit, and harden scripts against dark forces.</p>
+    </nav>
+    
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1 class="logo">Lab of Eden</h1>
+            <p class="tagline">Defiant innovation through the pursuit of all knowledge—especially the kind others deem dangerous</p>
+            <div class="founder">
+                <img src="https://via.placeholder.com/150" alt="Newton, Founder of Lab of Eden">
+                <div>
+                    <p>Founded by Newton</p>
+                    <p>CyberAnalyst, healthTechnologist, AI enthosist</p>
+                </div>
+            </div>
         </div>
-        <div class="feature">
-            <h3>🤖 Automation Dojo</h3>
-            <p>Build scripts that fight repetitive tasks for you.</p>
+    </header>
+    
+    <!-- About Section -->
+    <section id="about">
+        <h2 class="section-title fade-in">About Lab of Eden</h2>
+        <p class="about-quote fade-in">"Change is inevitable. Adaptability is the survival."</p>
+        <div class="fade-in">
+            <p>Lab of Eden is a tech initiative born from the philosophy that knowledge is not to be feared or forbidden—it is to be pursued relentlessly. We stand at the intersection of cybersecurity, artificial intelligence, and health tech, challenging norms and crafting tools that empower individuals and disrupt outdated systems.</p>
+            <p>Founded by Newton. We build tools, systems, and platforms designed to empower individuals and institutions alike—not just to use technology, but to wield it.</p>
         </div>
-    </div>
-
-    <!-- Main Call-to-Action -->
-    <a href="lecture-1-intro.html" class="btn">Start when ready →</a>
-    <br>
-    <a href="https://github.com/Lab-of-Eden/powershell-tutorial" target="_blank" class="btn" style="background: var(--accent-yellow); color: var(--dark-bg);">
-        📜 Download Secret Scrolls (GitHub Scripts)
-    </a>
-
-    <!-- Social Sharing -->
-    <div class="social-share">
-        <p>🔥 <strong>Spread the knowledge!</strong> Share this course:</p>
-        <a href="https://twitter.com/intent/tweet?text=Master%20PowerShell%20like%20a%20ninja%20with%20%40LabOfEden%27s%20free%20course!%20%E2%9A%A1%EF%B8%8F%20Check%20it%20out%3A%20[YOUR-GITHUB-PAGES-URL]" target="_blank" class="social-btn twitter">🐦</a>
-        <a href="https://www.linkedin.com/shareArticle?mini=true&url=[YOUR-GITHUB-PAGES-URL]&title=PowerShell%20Kung%20Fu%20Course&summary=Learn%20PowerShell%20with%20a%20security%20focus!" target="_blank" class="social-btn linkedin">🔗</a>
-        <a href="https://www.facebook.com/sharer/sharer.php?u=[YOUR-GITHUB-PAGES-URL]" target="_blank" class="social-btn facebook">📘</a>
-        <a href="https://wa.me/?text=Check%20out%20this%20awesome%20PowerShell%20course%3A%20[YOUR-GITHUB-PAGES-URL]" target="_blank" class="social-btn whatsapp">📱</a>
-    </div>
-	<p>For additional help, please contact support: labofeden@gamil.com</p>    
-	
-    <!-- Progress Tracker -->
-    <div id="progress-tracker" style="margin-top: 40px; display: none;">
-        <h3>Your Training Progress</h3>
-        <progress value="0" max="15" id="progress-bar"></progress>
-        <p id="progress-text">0/15 lectures completed</p>
-    </div>
-
+    </section>
+    
+    <!-- Philosophy Section -->
+    <section id="philosophy">
+        <h2 class="section-title fade-in">Core Philosophy</h2>
+        <p class="fade-in">Knowledge is Power—but only when acted upon.</p>
+        <div class="philosophy-container">
+            <div class="philosophy-card fade-in">
+                <h3>We don't seek permission to disrupt</h3>
+                <p>True innovation happens at the edges of what's acceptable. We push boundaries because that's where progress lives.</p>
+            </div>
+            <div class="philosophy-card fade-in">
+                <h3>Tech should serve the bold</h3>
+                <p>We build for those who take action, not for passive consumers. Our tools amplify agency and capability.</p>
+            </div>
+            <div class="philosophy-card fade-in">
+                <h3>Truth is bitter</h3>
+                <p>We swallow hard truths whole, then we code solutions. No sugarcoating, no illusions—just progress.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Focus Areas Section -->
+    <section id="focus" class="focus-areas">
+        <h2 class="section-title fade-in">Fields of Focus</h2>
+        <div class="focus-grid">
+            <div class="focus-card fade-in">
+                <h3>Cybersecurity & Digital Sovereignty</h3>
+                <p>We don't just secure systems—we liberate them.</p>
+                <ul>
+                    <li>Tools to control, protect, and vanish digital footprints</li>
+                    <li>Endpoint monitoring & restriction systems</li>
+                    <li>Ethical hacking and data sanitization</li>
+                </ul>
+            </div>
+            <div class="focus-card fade-in">
+                <h3>Artificial Intelligence & Machine Learning</h3>
+                <p>AI isn't the future—it's the battleground. We aim to own it.</p>
+                <ul>
+                    <li>Predictive health modeling and threat detection</li>
+                    <li>AI-powered personal agents</li>
+                    <li>Custom models trained on proprietary data</li>
+                </ul>
+            </div>
+            <div class="focus-card fade-in">
+                <h3>Health Tech & Data-Driven Medicine</h3>
+                <p>The future of medicine is intelligent, real-time, and accessible.</p>
+                <ul>
+                    <li>Hospital resource dashboards</li>
+                    <li>Patient analytics and diagnostics prediction</li>
+                    <li>Privacy-respecting EHR solutions</li>
+                </ul>
+            </div>
+            <div class="focus-card fade-in">
+                <h3>Education & Knowledge Engineering</h3>
+                <p>We build tools for minds, not just machines.</p>
+                <ul>
+                    <li>Prompt engineering and data visualization</li>
+                    <li>Curated content engines</li>
+                    <li>Open-access research platforms</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Vision Section -->
+    <section id="vision">
+        <h2 class="section-title fade-in">Our Vision</h2>
+        <p class="vision-statement fade-in">To evolve Lab of Eden into a tech empire rooted in unapologetic innovation, driven by the idea that those who control knowledge, control reality.</p>
+        <div class="fade-in">
+            <p>We don't follow tech trends—we set the rules behind them. Our long-term plan:</p>
+            <ul>
+                <li>Build an arsenal of open and proprietary tools</li>
+                <li>Own healthcare and cybersecurity datasets (data is the new oil)</li>
+                <li>Establish a network of tech-for-good systems—each rebellious, each unstoppable</li>
+            </ul>
+        </div>
+    </section>
+    
+    <!-- Who We're For Section -->
+    <section id="audience">
+        <h2 class="section-title fade-in">Who Lab of Eden Is For</h2>
+        <div class="audience-container">
+            <div class="audience-card fade-in">
+                <div class="audience-icon"><i class="fas fa-user-secret"></i></div>
+                <h3>Hackers & Builders</h3>
+                <p>Those who create what doesn't yet exist</p>
+            </div>
+            <div class="audience-card fade-in">
+                <div class="audience-icon"><i class="fas fa-heartbeat"></i></div>
+                <h3>Healers & Caregivers</h3>
+                <p>Those mending bodies and minds with tech</p>
+            </div>
+            <div class="audience-card fade-in">
+                <div class="audience-icon"><i class="fas fa-question"></i></div>
+                <h3>Questioners</h3>
+                <p>Those who challenge every assumption</p>
+            </div>
+            <div class="audience-card fade-in">
+                <div class="audience-icon"><i class="fas fa-apple-alt"></i></div>
+                <h3>The Bold</h3>
+                <p>Those who eat the apple with full awareness</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer/Contact -->
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-logo">Lab of Eden</div>
+            <p>"Change is inevitable. Adaptability is the survival"</p>
+            
+            <div class="contact-info">
+                <p><a href="mailto:labofeden@gmail.com">labofeden@gmail.com</a></p>
+                <p><a href="tel:+254768882585">+254 7688 82585</a></p>
+            </div>
+            
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-telegram"></i></a>
+            </div>
+            
+            <p class="copyright">© 2023 Lab of Eden. Founded by Newton. All rights reserved.</p>
+        </div>
+    </footer>
+    
     <script>
-        // Progress tracking
-        if (localStorage.getItem('completedLectures')) {
-            const completed = JSON.parse(localStorage.getItem('completedLectures')).length;
-            document.getElementById('progress-tracker').style.display = 'block';
-            document.getElementById('progress-bar').value = completed;
-            document.getElementById('progress-text').textContent = `${completed}/15 lectures completed`;
-        }
-
-        // Replace [YOUR-GITHUB-PAGES-URL] with your actual GitHub Pages URL
-        const pageUrl = encodeURIComponent('https://lab-of-eden.github.io/powershell-tutorial/');
-        document.querySelectorAll('.social-btn').forEach(btn => {
-            btn.href = btn.href.replace('[YOUR-GITHUB-PAGES-URL]', pageUrl);
-        });
-
-        // ASCII Art on hover (optional)
-        document.querySelector('h1').addEventListener('mouseover', () => {
-            console.log('%c (•_•)\n<(╯°□°)╯︵ ┻━┻\n PowerShell Kung Fu!', 
-                'font-family: monospace; font-size: 14px; color: #64ffda;');
+        // JavaScript for animations and interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate elements when they come into view
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            fadeElements.forEach(el => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+            
+            // Smooth scrolling for navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Add current year to copyright
+            document.querySelector('.copyright').textContent = 
+                `© ${new Date().getFullYear()} Lab of Eden. Founded by Newton. All rights reserved.`;
         });
     </script>
 </body>
